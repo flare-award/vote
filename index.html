@@ -1105,104 +1105,178 @@
     </div>
 
     <script>
-        // ВСЁ В ОДНОМ ФАЙЛЕ - АУТЕНТИФИКАЦИЯ, ГОЛОСОВАНИЕ И АДМИН-ПАНЕЛЬ
-        
+        // ПРОСТОЙ И РАБОЧИЙ КОД
         document.addEventListener('DOMContentLoaded', function() {
             console.log('FLARE 2025 - Сайт загружен!');
             
-            // Инициализация всех систем
-            initAuthSystem();
-            initVotingSystem();
-            initAdminSystem();
-            initUIEvents();
-            
             // Проверяем авторизацию при загрузке
-            checkExistingAuth();
+            checkAuth();
+            
+            // Настраиваем все обработчики
+            setupEventListeners();
         });
 
-        // ==================== СИСТЕМА АУТЕНТИФИКАЦИИ ====================
-        function initAuthSystem() {
-            console.log('Инициализация системы аутентификации...');
+        function checkAuth() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                document.getElementById('authBtn').textContent = savedUser;
+                
+                // Показываем админ-панель для maronnix9991
+                if (savedUser === 'maronnix9991') {
+                    document.getElementById('adminMenuContainer').style.display = 'block';
+                    console.log('Админ-панель показана для пользователя:', savedUser);
+                }
+            }
+        }
+
+        function setupEventListeners() {
+            console.log('Настраиваем обработчики событий...');
             
-            // Кнопка входа
+            // ========== АУТЕНТИФИКАЦИЯ ==========
             document.getElementById('authBtn').addEventListener('click', function() {
                 document.getElementById('authModal').style.display = 'flex';
             });
 
-            // Кнопка регистрации
             document.getElementById('registerBtn').addEventListener('click', function() {
                 const username = document.getElementById('usernameInput').value.trim();
-                const password = document.getElementById('passwordInput').value;
-                const confirmPassword = document.getElementById('confirmPasswordInput').value;
                 
                 if (!username) {
                     alert('Введите ваш Discord никнейм');
                     return;
                 }
-
-                if (password !== confirmPassword) {
-                    alert('Пароли не совпадают');
-                    return;
-                }
-
+                
                 // Сохраняем пользователя
                 localStorage.setItem('currentUser', username);
-                localStorage.setItem('userPassword', password);
-                
-                updateAuthUI(username);
+                document.getElementById('authBtn').textContent = username;
                 document.getElementById('authModal').style.display = 'none';
+                
                 alert('Добро пожаловать, ' + username + '!');
+                
+                // Показываем админ-панель для maronnix9991
+                if (username === 'maronnix9991') {
+                    document.getElementById('adminMenuContainer').style.display = 'block';
+                    console.log('Админ-панель показана');
+                }
                 
                 // Очищаем форму
                 document.getElementById('usernameInput').value = '';
                 document.getElementById('passwordInput').value = '';
                 document.getElementById('confirmPasswordInput').value = '';
             });
-        }
 
-        function checkExistingAuth() {
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                updateAuthUI(savedUser);
-            }
-        }
-
-        function updateAuthUI(username) {
-            document.getElementById('authBtn').textContent = username;
+            // ========== ГОЛОСОВАНИЕ ==========
+            // Основные кнопки голосования
+            document.getElementById('voteMainBtn').addEventListener('click', function() {
+                openVotingModal('main');
+            });
             
-            // Показываем админ-панель для админа
-            if (username === 'maronnix9991') {
-                document.getElementById('adminMenuContainer').style.display = 'block';
-            }
-        }
-
-        // ==================== СИСТЕМА ГОЛОСОВАНИЯ ====================
-        function initVotingSystem() {
-            console.log('Инициализация системы голосования...');
+            document.getElementById('voteAdditionalBtn').addEventListener('click', function() {
+                openVotingModal('additional');
+            });
             
-            // Все кнопки голосования
-            const voteButtons = [
-                'voteMainBtn', 'voteAdditionalBtn', 'voteMainBtn2', 'voteAdditionalBtn2'
-            ];
+            document.getElementById('voteMainBtn2').addEventListener('click', function() {
+                openVotingModal('main');
+            });
             
-            voteButtons.forEach(buttonId => {
-                const button = document.getElementById(buttonId);
-                if (button) {
-                    button.addEventListener('click', function() {
-                        const category = buttonId.includes('Main') ? 'main' : 'additional';
-                        openVotingModal(category);
-                    });
-                }
+            document.getElementById('voteAdditionalBtn2').addEventListener('click', function() {
+                openVotingModal('additional');
             });
 
-            // Навигация в модальных окнах голосования
+            // Навигация в голосовании
             document.getElementById('backToNominationsBtn').addEventListener('click', function() {
                 document.getElementById('nomineeModal').style.display = 'none';
                 document.getElementById('nominationModal').style.display = 'flex';
             });
 
-            document.getElementById('confirmVoteBtn').addEventListener('click', confirmVote);
+            document.getElementById('confirmVoteBtn').addEventListener('click', function() {
+                confirmVote();
+            });
+
+            // ========== АДМИН-ПАНЕЛЬ ==========
+            document.getElementById('adminMenuBtn').addEventListener('click', function(e) {
+                e.stopPropagation();
+                document.getElementById('adminDropdown').classList.toggle('show');
+            });
+
+            // Закрытие админ-меню при клике вне его
+            document.addEventListener('click', function() {
+                document.getElementById('adminDropdown').classList.remove('show');
+            });
+
+            // Кнопки админ-панели
+            document.getElementById('viewResultsBtn').addEventListener('click', function() {
+                viewResults();
+            });
+            
+            document.getElementById('viewStatsBtn').addEventListener('click', function() {
+                viewStats();
+            });
+
+            // ========== FAQ И РЕПОРТЫ ==========
+            document.querySelectorAll('.faq-question').forEach(question => {
+                question.addEventListener('click', function() {
+                    this.parentElement.classList.toggle('active');
+                });
+            });
+
+            document.getElementById('reportLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('reportModal').style.display = 'flex';
+            });
+
+            document.getElementById('submitReport').addEventListener('click', function() {
+                const nickname = document.getElementById('reportNickname').value;
+                const description = document.getElementById('reportDescription').value;
+                
+                if (nickname && description) {
+                    alert('Спасибо за ваш репорт!');
+                    document.getElementById('reportModal').style.display = 'none';
+                    
+                    // Очищаем форму
+                    document.getElementById('reportNickname').value = '';
+                    document.getElementById('reportReason').value = '';
+                    document.getElementById('reportDescription').value = '';
+                } else {
+                    alert('Пожалуйста, заполните все поля');
+                }
+            });
+
+            // ========== ЗАКРЫТИЕ МОДАЛЬНЫХ ОКОН ==========
+            document.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.closest('.modal').style.display = 'none';
+                });
+            });
+
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.style.display = 'none';
+                    }
+                });
+            });
+
+            // ========== АНИМАЦИЯ СКРОЛЛА ==========
+            window.addEventListener('scroll', function() {
+                const header = document.getElementById('mainHeader');
+                const hero = document.getElementById('heroSection');
+                const scrollTop = window.pageYOffset;
+                
+                if (scrollTop > 100) {
+                    header.classList.add('scrolled');
+                    hero.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                    hero.classList.remove('scrolled');
+                }
+            });
+
+            console.log('Все обработчики настроены!');
         }
+
+        // ========== ФУНКЦИИ ГОЛОСОВАНИЯ ==========
+        let currentCategory = null;
+        let currentNomination = null;
 
         function openVotingModal(category) {
             // Проверяем авторизацию
@@ -1212,6 +1286,8 @@
                 document.getElementById('authModal').style.display = 'flex';
                 return;
             }
+            
+            currentCategory = category;
             
             // Устанавливаем заголовок
             document.getElementById('nominationModalTitle').textContent = 
@@ -1229,39 +1305,33 @@
                 { 
                     id: 'best_player', 
                     name: 'Лучший игрок года', 
-                    description: 'За выдающиеся достижения в игровом процессе',
-                    image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+                    description: 'За выдающиеся достижения в игровом процессе'
                 },
                 { 
                     id: 'most_active', 
                     name: 'Самый активный участник', 
-                    description: 'За постоянную активность в сообществе',
-                    image: 'https://images.unsplash.com/photo-1511988617509-a57c8a288659?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+                    description: 'За постоянную активность в сообществе'
                 },
                 { 
                     id: 'best_communicator', 
                     name: 'Лучший коммуникатор', 
-                    description: 'За умение общаться и создавать атмосферу',
-                    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+                    description: 'За умение общаться и создавать атмосферу'
                 }
             ] : [
                 { 
                     id: 'most_funny', 
                     name: 'Самый веселый участник', 
-                    description: 'За способность поднять настроение',
-                    image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+                    description: 'За способность поднять настроение'
                 },
                 { 
                     id: 'best_builder', 
                     name: 'Лучший строитель', 
-                    description: 'За создание впечатляющих построек',
-                    image: 'https://images.unsplash.com/photo-1511988617509-a57c8a288659?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+                    description: 'За создание впечатляющих построек'
                 },
                 { 
                     id: 'music_talent', 
                     name: 'Музыкальный талант', 
-                    description: 'За музыкальные способности',
-                    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+                    description: 'За музыкальные способности'
                 }
             ];
             
@@ -1272,7 +1342,7 @@
                 const card = document.createElement('div');
                 card.className = 'nomination-card';
                 card.innerHTML = `
-                    <img class="nomination-card-image" src="${nomination.image}" alt="${nomination.name}">
+                    <img class="nomination-card-image" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="${nomination.name}">
                     <h3 class="nomination-card-title">${nomination.name}</h3>
                     <p class="nomination-card-description">${nomination.description}</p>
                     <div class="nomination-card-status">Нажмите для выбора</div>
@@ -1287,16 +1357,18 @@
         }
 
         function openNomineeModal(nomination) {
+            currentNomination = nomination;
+            
             document.getElementById('nomineeModalTitle').textContent = nomination.name;
             document.getElementById('nominationDescription').textContent = nomination.description;
             
-            loadNominees(nomination);
+            loadNominees();
             
             document.getElementById('nominationModal').style.display = 'none';
             document.getElementById('nomineeModal').style.display = 'flex';
         }
 
-        function loadNominees(nomination) {
+        function loadNominees() {
             const nominees = ["Cloury", "Dony_zq", "Eozik", "Flourin", "Izumrudik", "Makos", "Menchik", "Nodben", "Qusti"];
             
             const grid = document.getElementById('nomineesGrid');
@@ -1322,10 +1394,6 @@
                     // Выделяем текущую карточку
                     this.classList.add('selected');
                     
-                    // Сохраняем данные для голосования
-                    this.setAttribute('data-nominee', nominee);
-                    this.setAttribute('data-nomination', nomination.id);
-                    
                     // Активируем кнопку подтверждения
                     document.getElementById('confirmVoteBtn').disabled = false;
                 });
@@ -1341,56 +1409,40 @@
                 return;
             }
 
-            const nominee = selectedCard.getAttribute('data-nominee');
-            const nomination = selectedCard.getAttribute('data-nomination');
-            const user = localStorage.getItem('currentUser');
+            const nomineeName = selectedCard.querySelector('.nominee-name').textContent;
+            const userName = localStorage.getItem('currentUser');
             
             // Сохраняем голос
-            saveVote(user, nomination, nominee);
+            saveVote(userName, currentCategory, currentNomination.id, nomineeName);
             
-            alert('Ваш голос за ' + nominee + ' сохранен!');
+            alert('Ваш голос за ' + nomineeName + ' в номинации "' + currentNomination.name + '" сохранен!');
             document.getElementById('nomineeModal').style.display = 'none';
         }
 
-        function saveVote(user, nomination, nominee) {
+        function saveVote(user, category, nominationId, nominee) {
             // Получаем существующие голоса
             const votes = JSON.parse(localStorage.getItem('flare_votes') || '[]');
             
-            // Добавляем новый голос
-            votes.push({
+            // Создаем объект голоса
+            const vote = {
                 user: user,
-                nomination: nomination,
+                category: category,
+                nomination: nominationId,
                 nominee: nominee,
                 timestamp: new Date().toISOString()
-            });
+            };
+            
+            // Добавляем новый голос
+            votes.push(vote);
             
             // Сохраняем обратно
             localStorage.setItem('flare_votes', JSON.stringify(votes));
             
-            console.log('Голос сохранен:', { user, nomination, nominee });
+            console.log('Голос сохранен:', vote);
+            console.log('Все голоса:', votes);
         }
 
-        // ==================== АДМИН-ПАНЕЛЬ ====================
-        function initAdminSystem() {
-            console.log('Инициализация админ-панели...');
-            
-            // Кнопка админ-меню
-            document.getElementById('adminMenuBtn').addEventListener('click', function(e) {
-                e.stopPropagation();
-                document.getElementById('adminDropdown').classList.toggle('show');
-            });
-
-            // Закрытие админ-меню при клике вне его
-            document.addEventListener('click', function() {
-                document.getElementById('adminDropdown').classList.remove('show');
-            });
-
-            // Кнопки админ-панели
-            document.getElementById('viewResultsBtn').addEventListener('click', viewResults);
-            document.getElementById('viewStatsBtn').addEventListener('click', viewStats);
-            document.getElementById('viewReportsBtn').addEventListener('click', viewReports);
-        }
-
+        // ========== АДМИН-ФУНКЦИИ ==========
         function viewResults() {
             const votes = JSON.parse(localStorage.getItem('flare_votes') || '[]');
             
@@ -1401,6 +1453,7 @@
 
             // Подсчитываем результаты
             const results = {};
+            
             votes.forEach(vote => {
                 const key = vote.nomination;
                 if (!results[key]) {
@@ -1412,20 +1465,21 @@
                 results[key][vote.nominee]++;
             });
 
-            // Форматируем результаты для показа
+            // Форматируем результаты
             let resultsText = 'РЕЗУЛЬТАТЫ ГОЛОСОВАНИЯ:\n\n';
             
-            for (const [nomination, nominees] of Object.entries(results)) {
-                resultsText += `Номинация: ${nomination}\n`;
+            Object.entries(results).forEach(([nomination, nominees]) => {
+                resultsText += `${nomination}:\n`;
                 
                 // Сортируем по количеству голосов
-                const sorted = Object.entries(nominees).sort((a, b) => b[1] - a[1]);
+                Object.entries(nominees)
+                    .sort((a, b) => b[1] - a[1])
+                    .forEach(([nominee, count]) => {
+                        resultsText += `  ${nominee}: ${count} голосов\n`;
+                    });
                 
-                sorted.forEach(([nominee, count]) => {
-                    resultsText += `  ${nominee}: ${count} голосов\n`;
-                });
                 resultsText += '\n';
-            }
+            });
 
             alert(resultsText);
         }
@@ -1439,96 +1493,10 @@
             stats += `Всего голосов: ${totalVotes}\n`;
             stats += `Уникальных голосующих: ${uniqueVoters}\n`;
             
-            // Статистика по номинациям
-            const byNomination = {};
-            votes.forEach(vote => {
-                if (!byNomination[vote.nomination]) {
-                    byNomination[vote.nomination] = 0;
-                }
-                byNomination[vote.nomination]++;
-            });
-            
-            stats += `\nПо номинациям:\n`;
-            for (const [nomination, count] of Object.entries(byNomination)) {
-                stats += `  ${nomination}: ${count} голосов\n`;
-            }
-
             alert(stats);
         }
 
-        function viewReports() {
-            alert('Система репортов в разработке. Будут доступны скоро!');
-        }
-
-        // ==================== ОБЩИЕ UI СОБЫТИЯ ====================
-        function initUIEvents() {
-            console.log('Инициализация UI событий...');
-            
-            // Анимация скролла для шапки
-            window.addEventListener('scroll', function() {
-                const header = document.getElementById('mainHeader');
-                const hero = document.getElementById('heroSection');
-                const scrollTop = window.pageYOffset;
-                
-                if (scrollTop > 100) {
-                    header.classList.add('scrolled');
-                    hero.classList.add('scrolled');
-                } else {
-                    header.classList.remove('scrolled');
-                    hero.classList.remove('scrolled');
-                }
-            });
-
-            // FAQ
-            document.querySelectorAll('.faq-question').forEach(question => {
-                question.addEventListener('click', function() {
-                    this.parentElement.classList.toggle('active');
-                });
-            });
-
-            // Ссылка на репорт
-            document.getElementById('reportLink').addEventListener('click', function(e) {
-                e.preventDefault();
-                document.getElementById('reportModal').style.display = 'flex';
-            });
-
-            // Отправка репорта
-            document.getElementById('submitReport').addEventListener('click', function() {
-                const nickname = document.getElementById('reportNickname').value;
-                const reason = document.getElementById('reportReason').value;
-                const description = document.getElementById('reportDescription').value;
-                
-                if (nickname && reason && description) {
-                    alert('Спасибо за ваш репорт! Мы исправим проблему в ближайшее время.');
-                    document.getElementById('reportModal').style.display = 'none';
-                    
-                    // Очищаем форму
-                    document.getElementById('reportNickname').value = '';
-                    document.getElementById('reportReason').value = '';
-                    document.getElementById('reportDescription').value = '';
-                } else {
-                    alert('Пожалуйста, заполните все поля');
-                }
-            });
-
-            // Закрытие модальных окон
-            document.querySelectorAll('.close-modal').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    this.closest('.modal').style.display = 'none';
-                });
-            });
-
-            // Закрытие модальных окон при клике вне их
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        this.style.display = 'none';
-                    }
-                });
-            });
-        }
-
-        console.log('Все системы инициализированы! FLARE 2025 готов к работе!');
+        console.log('FLARE 2025 готов к работе!');
     </script>
 </body>
 </html>

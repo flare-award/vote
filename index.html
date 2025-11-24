@@ -387,16 +387,6 @@
             box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
         }
 
-        /* Добавляем в стили */
-        .btn-cancel {
-            background: linear-gradient(90deg, #ff4444 0%, #cc0000 100%) !important;
-        }
-
-        .btn-cancel:hover {
-            background: linear-gradient(90deg, #cc0000 0%, #990000 100%) !important;
-            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3) !important;
-        }
-
         /* Секция с таймером */
         .timer-section {
             background: rgba(0, 0, 0, 0.3);
@@ -877,6 +867,7 @@
             align-items: center;
         }
 
+        /* ДОБАВЛЯЕМ В СТИЛИ */
         .modal-content {
             background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
             border-radius: 15px;
@@ -899,13 +890,14 @@
             border-bottom: 1px solid rgba(212, 175, 55, 0.3);
         }
 
-                .vote-modal-content .modal-body {
+        .vote-modal-content .modal-body {
             flex: 1;
             overflow-y: auto;
             padding: 0 0.5rem;
             margin: 0 -0.5rem;
         }
 
+        /* Улучшаем скролл внутри модального окна */
         .vote-modal-content .modal-body::-webkit-scrollbar {
             width: 8px;
         }
@@ -1893,7 +1885,9 @@
             "Выход серии THE FANTASTIC SPIDER-MAN 4 ЭПИЗОД": "https://i.postimg.cc/2S2G18Dc/выход_серии_tfsm4.png",
             "Dony_zq - ало пицца": "https://i.postimg.cc/Y9XkGRZJ/alo-picca.png",
             "Eozik x Maronnix": "https://i.postimg.cc/s2jny0tv/Eozik-x-Maronnix.png",
-            "Другое": "https://i.postimg.cc/NFJzTFs5/drugoe.png"
+            "Другое": "https://i.postimg.cc/NFJzTFs5/drugoe.png",
+            "Akirakume x Qusti": "https://i.postimg.cc/pXKjKbgZ/Akirakume-x-Qusti.png",
+            "Rematch": "https://i.postimg.cc/2S41LQLJ/Rematch.png"
         };
 
         // Объект с URL изображений для номинаций
@@ -2046,7 +2040,7 @@ const NOMINATIONS = {
             id: 'fail_of_year', 
             name: 'ПРОВАЛ ГОДА', 
             description: 'То, что получилось ужасно, ведь хотелось по-другому.',
-            nominees: ["Несостоящаяся встреча Флоурина с Нодбеном", "Макос перестал стримить спустя месяц", "Интернет Нодбена", "Сайт FLARE"]
+            nominees: ["Несостоящаяся встреча Флоурина с Нодбеном", "Макос перестал стримить спустя месяц", "Интернет Нодбена"]
         },
         { 
             id: 'phrase_of_year', 
@@ -2910,277 +2904,220 @@ const NOMINATIONS = {
             }
         }
 
-// ========== ФУНКЦИИ ГОЛОСОВАНИЯ ==========
-let currentCategory = null;
-let currentNomination = null;
-let selectedOtherValue = '';
-let hasExistingVote = false;
-let existingVoteNominee = '';
+        // ========== ФУНКЦИИ ГОЛОСОВАНИЯ ==========
+        let currentCategory = null;
+        let currentNomination = null;
+        let selectedOtherValue = '';
 
-function openVotingModal(category) {
-    console.log('Открываем модальное окно голосования для категории:', category);
-    
-    const currentUser = localStorage.getItem('currentUser');
-    if (!currentUser) {
-        alert('Пожалуйста, войдите в систему для голосования');
-        document.getElementById('authModal').style.display = 'flex';
-        return;
-    }
-    
-    currentCategory = category;
-    
-    document.getElementById('nominationModalTitle').textContent = 
-        category === 'main' ? 'Основные номинации' : 'Дополнительные номинации';
-    
-    // ЗАПРЕЩАЕМ ПРОКРУТКУ САЙТА ПРИ ОТКРЫТОМ МОДАЛЬНОМ ОКНЕ
-    document.body.style.overflow = 'hidden';
-    
-    loadNominations(category);
-    document.getElementById('nominationModal').style.display = 'flex';
-    
-    // СБРАСЫВАЕМ ПРОКРУТКУ К НАЧАЛУ ПРИ ОТКРЫТИИ
-    setTimeout(() => {
-        const modalContent = document.querySelector('#nominationModal .modal-content');
-        if (modalContent) {
-            modalContent.scrollTop = 0;
-        }
-    }, 50);
-}
-
-function loadNominations(category) {
-    console.log('Загружаем номинации для категории:', category);
-    
-    const nominations = NOMINATIONS[category];
-    const grid = document.getElementById('nominationsGrid');
-    grid.innerHTML = '';
-    
-    nominations.forEach(nomination => {
-        const card = document.createElement('div');
-        card.className = 'nomination-card';
-        
-        const userVotes = getUserVotes();
-        const currentUser = localStorage.getItem('currentUser');
-        const mainNickname = getMainNickname(currentUser);
-        const userVote = userVotes.find(vote => 
-            getMainNickname(vote.user) === mainNickname && 
-            vote.nomination === nomination.id && 
-            vote.category === category
-        );
-        
-        const statusText = userVote ? 
-            `Вы уже голосовали: ${userVote.nominee}` : 
-            'Нажмите для выбора';
-        
-        // Получаем URL изображения для номинации
-        const nominationImage = NOMINATION_IMAGES[nomination.id] || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-        
-        card.innerHTML = `
-            <img class="nomination-card-image" src="${nominationImage}" alt="${nomination.name}">
-            <h3 class="nomination-card-title">${nomination.name}</h3>
-            <p class="nomination-card-description">${nomination.description}</p>
-            <div class="nomination-card-status">${statusText}</div>
-        `;
-        
-        card.addEventListener('click', function() {
-            console.log('Выбрана номинация:', nomination.name);
-            openNomineeModal(nomination);
-        });
-        
-        grid.appendChild(card);
-    });
-}
-
-function openNomineeModal(nomination) {
-    console.log('Открываем модальное окно номинантов для:', nomination.name);
-    
-    currentNomination = nomination;
-    document.getElementById('nomineeModalTitle').textContent = nomination.name;
-    document.getElementById('nominationDescription').textContent = nomination.description;
-    
-    loadNominees();
-    document.getElementById('nominationModal').style.display = 'none';
-    document.getElementById('nomineeModal').style.display = 'flex';
-    
-    // СБРАСЫВАЕМ ПРОКРУТКУ К НАЧАЛУ ПРИ ОТКРЫТИИ
-    setTimeout(() => {
-        const modalContent = document.querySelector('#nomineeModal .modal-content');
-        if (modalContent) {
-            modalContent.scrollTop = 0;
-        }
-    }, 50);
-}
-
-function loadNominees() {
-    console.log('Загружаем список номинантов');
-    
-    const grid = document.getElementById('nomineesGrid');
-    grid.innerHTML = '';
-    document.getElementById('confirmVoteBtn').disabled = true;
-    selectedOtherValue = '';
-    
-    // Сбрасываем состояние
-    hasExistingVote = false;
-    existingVoteNominee = '';
-    
-    // Удаляем предыдущее поле ввода "Другое", если оно было
-    const existingOtherInput = document.querySelector('.other-input-container');
-    if (existingOtherInput) {
-        existingOtherInput.remove();
-    }
-    
-    const userVotes = getUserVotes();
-    const currentUser = localStorage.getItem('currentUser');
-    const mainNickname = getMainNickname(currentUser);
-    const currentVote = userVotes.find(vote => 
-        getMainNickname(vote.user) === mainNickname && 
-        vote.nomination === currentNomination.id && 
-        vote.category === currentCategory
-    );
-    
-    // ОБНОВЛЯЕМ КНОПКУ В ЗАВИСИМОСТИ ОТ ТОГО, ЕСТЬ ЛИ УЖЕ ГОЛОС
-    const confirmBtn = document.getElementById('confirmVoteBtn');
-    if (currentVote) {
-        hasExistingVote = true;
-        existingVoteNominee = currentVote.nominee;
-        confirmBtn.textContent = 'Отменить выбор';
-        confirmBtn.disabled = false;
-        confirmBtn.style.background = 'linear-gradient(90deg, #ff4444 0%, #cc0000 100%)';
-    } else {
-        confirmBtn.textContent = 'Подтвердить голос';
-        confirmBtn.disabled = true;
-        confirmBtn.style.background = 'linear-gradient(90deg, var(--gold) 0%, var(--light-gold) 100%)';
-    }
-    
-    // Обрабатываем номинантов в зависимости от типа
-    if (currentNomination.hasLinks) {
-        // Для треков с ссылками
-        currentNomination.nominees.forEach(nominee => {
-            const card = document.createElement('div');
-            card.className = 'nominee-card';
+        function openVotingModal(category) {
+            console.log('Открываем модальное окно голосования для категории:', category);
             
-            if (currentVote && currentVote.nominee === nominee.name) {
-                card.classList.add('selected');
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                alert('Пожалуйста, войдите в систему для голосования');
+                document.getElementById('authModal').style.display = 'flex';
+                return;
             }
             
-            card.innerHTML = `
-                <a href="${nominee.link}" target="_blank" class="track-link">${nominee.name}</a>
-            `;
+            currentCategory = category;
             
-            card.addEventListener('click', function(e) {
-                if (e.target.tagName === 'A') return; // Не выбираем при клике на ссылку
+            document.getElementById('nominationModalTitle').textContent = 
+                category === 'main' ? 'Основные номинации' : 'Дополнительные номинации';
+            
+            loadNominations(category);
+            document.getElementById('nominationModal').style.display = 'flex';
+        }
+
+        function loadNominations(category) {
+            console.log('Загружаем номинации для категории:', category);
+            
+            const nominations = NOMINATIONS[category];
+            const grid = document.getElementById('nominationsGrid');
+            grid.innerHTML = '';
+            
+            nominations.forEach(nomination => {
+                const card = document.createElement('div');
+                card.className = 'nomination-card';
                 
-                console.log('Выбран номинант:', nominee.name);
-                document.querySelectorAll('.nominee-card').forEach(c => {
-                    c.classList.remove('selected');
+                const userVotes = getUserVotes();
+                const currentUser = localStorage.getItem('currentUser');
+                const mainNickname = getMainNickname(currentUser);
+                const userVote = userVotes.find(vote => 
+                    getMainNickname(vote.user) === mainNickname && 
+                    vote.nomination === nomination.id && 
+                    vote.category === category
+                );
+                
+                const statusText = userVote ? 
+                    `Вы уже голосовали: ${userVote.nominee}` : 
+                    'Нажмите для выбора';
+                
+                // Получаем URL изображения для номинации
+                const nominationImage = NOMINATION_IMAGES[nomination.id] || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
+                
+                card.innerHTML = `
+                    <img class="nomination-card-image" src="${nominationImage}" alt="${nomination.name}">
+                    <h3 class="nomination-card-title">${nomination.name}</h3>
+                    <p class="nomination-card-description">${nomination.description}</p>
+                    <div class="nomination-card-status">${statusText}</div>
+                `;
+                
+                card.addEventListener('click', function() {
+                    console.log('Выбрана номинация:', nomination.name);
+                    openNomineeModal(nomination);
                 });
-                this.classList.add('selected');
                 
-                // ЕСЛИ ЕСТЬ СУЩЕСТВУЮЩИЙ ГОЛОС И ВЫБРАН ДРУГОЙ НОМИНАНТ
-                if (hasExistingVote && nominee.name !== existingVoteNominee) {
-                    confirmBtn.textContent = 'Подтвердить голос';
-                    confirmBtn.disabled = false;
-                    confirmBtn.style.background = 'linear-gradient(90deg, var(--gold) 0%, var(--light-gold) 100%)';
-                }
-                // ЕСЛИ ВЫБРАН ТОТ ЖЕ НОМИНАНТ, ЧТО И БЫЛ
-                else if (hasExistingVote && nominee.name === existingVoteNominee) {
-                    confirmBtn.textContent = 'Отменить выбор';
-                    confirmBtn.disabled = false;
-                    confirmBtn.style.background = 'linear-gradient(90deg, #ff4444 0%, #cc0000 100%)';
-                }
-                // ЕСЛИ НОВЫЙ ВЫБОР БЕЗ ПРЕДЫДУЩЕГО ГОЛОСА
-                else {
-                    confirmBtn.textContent = 'Подтвердить голос';
-                    confirmBtn.disabled = false;
-                    confirmBtn.style.background = 'linear-gradient(90deg, var(--gold) 0%, var(--light-gold) 100%)';
-                }
-                
-                // Сбрасываем состояние существующего голоса при выборе нового
-                if (nominee.name !== existingVoteNomnee) {
-                    hasExistingVote = false;
-                }
+                grid.appendChild(card);
             });
+        }
+
+        function openNomineeModal(nomination) {
+            console.log('Открываем модальное окно номинантов для:', nomination.name);
             
-            grid.appendChild(card);
-        });
-    } else {
-        // Обычные номинанты
-        currentNomination.nominees.forEach(nominee => {
-            const card = document.createElement('div');
-            card.className = 'nominee-card';
+            currentNomination = nomination;
+            document.getElementById('nomineeModalTitle').textContent = nomination.name;
+            document.getElementById('nominationDescription').textContent = nomination.description;
             
-            if (currentVote && currentVote.nominee === nominee) {
-                card.classList.add('selected');
+            loadNominees();
+            document.getElementById('nominationModal').style.display = 'none';
+            document.getElementById('nomineeModal').style.display = 'flex';
+        }
+
+        function loadNominees() {
+            console.log('Загружаем список номинантов');
+            
+            const grid = document.getElementById('nomineesGrid');
+            grid.innerHTML = '';
+            document.getElementById('confirmVoteBtn').disabled = true;
+            selectedOtherValue = '';
+            
+            // Удаляем предыдущее поле ввода "Другое", если оно было
+            const existingOtherInput = document.querySelector('.other-input-container');
+            if (existingOtherInput) {
+                existingOtherInput.remove();
             }
             
-            // Получаем URL изображения для номинанта
-            const avatarUrl = AVATAR_IMAGES[nominee] || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=1280&h=720&q=80';
+            const userVotes = getUserVotes();
+            const currentUser = localStorage.getItem('currentUser');
+            const mainNickname = getMainNickname(currentUser);
+            const currentVote = userVotes.find(vote => 
+                getMainNickname(vote.user) === mainNickname && 
+                vote.nomination === currentNomination.id && 
+                vote.category === currentCategory
+            );
             
-            card.innerHTML = `
-                <img class="nominee-image" src="${avatarUrl}" alt="${nominee}">
-                <div class="nominee-name">${nominee}</div>
+            // Обрабатываем номинантов в зависимости от типа
+            if (currentNomination.hasLinks) {
+                // Для треков с ссылками
+                currentNomination.nominees.forEach(nominee => {
+                    const card = document.createElement('div');
+                    card.className = 'nominee-card';
+                    
+                    if (currentVote && currentVote.nominee === nominee.name) {
+                        card.classList.add('selected');
+                        document.getElementById('confirmVoteBtn').disabled = false;
+                    }
+                    
+                    card.innerHTML = `
+                        <a href="${nominee.link}" target="_blank" class="track-link">${nominee.name}</a>
+                    `;
+                    
+                    card.addEventListener('click', function(e) {
+                        if (e.target.tagName === 'A') return; // Не выбираем при клике на ссылку
+                        
+                        console.log('Выбран номинант:', nominee.name);
+                        document.querySelectorAll('.nominee-card').forEach(c => {
+                            c.classList.remove('selected');
+                        });
+                        this.classList.add('selected');
+                        document.getElementById('confirmVoteBtn').disabled = false;
+                    });
+                    
+                    grid.appendChild(card);
+                });
+            } else {
+                // Обычные номинанты
+                currentNomination.nominees.forEach(nominee => {
+                    const card = document.createElement('div');
+                    card.className = 'nominee-card';
+                    
+                    if (currentVote && currentVote.nominee === nominee) {
+                        card.classList.add('selected');
+                        document.getElementById('confirmVoteBtn').disabled = false;
+                    }
+                    
+                    // Получаем URL изображения для номинанта
+                    const avatarUrl = AVATAR_IMAGES[nominee] || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=1280&h=720&q=80';
+                    
+                    card.innerHTML = `
+                        <img class="nominee-image" src="${avatarUrl}" alt="${nominee}">
+                        <div class="nominee-name">${nominee}</div>
+                    `;
+                    
+                    card.addEventListener('click', function() {
+                        console.log('Выбран номинант:', nominee);
+                        document.querySelectorAll('.nominee-card').forEach(c => {
+                            c.classList.remove('selected');
+                        });
+                        this.classList.add('selected');
+                        document.getElementById('confirmVoteBtn').disabled = false;
+                        
+                        // Если выбран "Другое", показываем поле ввода
+                        if (currentNomination.hasOther && nominee === 'Другое') {
+                            showOtherInput();
+                        } else {
+                            hideOtherInput();
+                        }
+                    });
+                    
+                    grid.appendChild(card);
+                });
+            }
+        }
+
+        function showOtherInput() {
+            // Удаляем предыдущее поле ввода, если оно было
+            const existingOtherInput = document.querySelector('.other-input-container');
+            if (existingOtherInput) {
+                existingOtherInput.remove();
+            }
+            
+            const otherInputContainer = document.createElement('div');
+            otherInputContainer.className = 'other-input-container';
+            otherInputContainer.innerHTML = `
+                <input type="text" class="other-input" id="otherInput" placeholder="Введите ник участника или событие...">
             `;
             
-            card.addEventListener('click', function() {
-                console.log('Выбран номинант:', nominee);
-                document.querySelectorAll('.nominee-card').forEach(c => {
-                    c.classList.remove('selected');
-                });
-                this.classList.add('selected');
-                
-                // ЕСЛИ ЕСТЬ СУЩЕСТВУЮЩИЙ ГОЛОС И ВЫБРАН ДРУГОЙ НОМИНАНТ
-                if (hasExistingVote && nominee !== existingVoteNominee) {
-                    confirmBtn.textContent = 'Подтвердить голос';
-                    confirmBtn.disabled = false;
-                    confirmBtn.style.background = 'linear-gradient(90deg, var(--gold) 0%, var(--light-gold) 100%)';
-                    hasExistingVote = false;
-                }
-                // ЕСЛИ ВЫБРАН ТОТ ЖЕ НОМИНАНТ, ЧТО И БЫЛ
-                else if (hasExistingVote && nominee === existingVoteNominee) {
-                    confirmBtn.textContent = 'Отменить выбор';
-                    confirmBtn.disabled = false;
-                    confirmBtn.style.background = 'linear-gradient(90deg, #ff4444 0%, #cc0000 100%)';
-                }
-                // ЕСЛИ НОВЫЙ ВЫБОР БЕЗ ПРЕДЫДУЩЕГО ГОЛОСА
-                else {
-                    confirmBtn.textContent = 'Подтвердить голос';
-                    confirmBtn.disabled = false;
-                    confirmBtn.style.background = 'linear-gradient(90deg, var(--gold) 0%, var(--light-gold) 100%)';
-                }
-                
-                // Если выбран "Другое", показываем поле ввода
-                if (currentNomination.hasOther && nominee === 'Другое') {
-                    showOtherInput();
-                } else {
-                    hideOtherInput();
-                }
-            });
+            document.getElementById('nomineesGrid').appendChild(otherInputContainer);
+            document.querySelector('.other-input-container').style.display = 'block';
             
-            grid.appendChild(card);
-        });
-    }
-}
+            // Добавляем обработчик изменения поля ввода
+            document.getElementById('otherInput').addEventListener('input', function() {
+                selectedOtherValue = this.value.trim();
+                document.getElementById('confirmVoteBtn').disabled = !selectedOtherValue;
+            });
+        }
 
+        function hideOtherInput() {
+            const otherInputContainer = document.querySelector('.other-input-container');
+            if (otherInputContainer) {
+                otherInputContainer.style.display = 'none';
+                selectedOtherValue = '';
+            }
+        }
+
+// ========== ИСПРАВЛЕННАЯ ФУНКЦИЯ ПОДТВЕРЖДЕНИЯ ГОЛОСА ==========
 async function confirmVote() {
-    console.log('Обработка голосования/отмены...');
+    console.log('Подтверждаем голосование...');
     
-    const confirmBtn = document.getElementById('confirmVoteBtn');
     const selectedCard = document.querySelector('.nominee-card.selected');
-    
-    // ЕСЛИ НАЖАТА КНОПКА "ОТМЕНИТЬ ВЫБОР"
-    if (confirmBtn.textContent === 'Отменить выбор') {
-        console.log('Отмена существующего голоса...');
-        await cancelVote();
-        return;
-    }
-    
-    // ЕСЛИ НАЖАТА КНОПКА "ПОДТВЕРДИТЬ ГОЛОС"
     if (!selectedCard) {
         alert('Пожалуйста, выберите номинанта');
         return;
     }
 
     let nomineeName;
-    
+
     if (currentNomination.hasLinks) {
         // Для треков берем текст ссылки
         nomineeName = selectedCard.querySelector('.track-link').textContent;
@@ -3195,7 +3132,7 @@ async function confirmVote() {
         // Обычный номинант
         nomineeName = selectedCard.querySelector('.nominee-name').textContent;
     }
-    
+
     const userName = localStorage.getItem('currentUser');
     
     // Сохраняем голос
@@ -3239,138 +3176,156 @@ async function confirmVote() {
             }
         }, 3000);
         
-        // ОБНОВЛЯЕМ КНОПКУ НА "ОТМЕНИТЬ ВЫБОР"
-        confirmBtn.textContent = 'Отменить выбор';
-        confirmBtn.style.background = 'linear-gradient(90deg, #ff4444 0%, #cc0000 100%)';
-        hasExistingVote = true;
-        existingVoteNominee = nomineeName;
-        
-        // Обновляем статус в карточке номинации
-        updateNominationStatus(currentNomination.name, nomineeName);
+        // ОБНОВЛЯЕМ СТАТУС В КАРТОЧКЕ НОМИНАЦИИ
+        updateNominationStatus(currentNomination.id, nomineeName);
         
         console.log('Голос сохранен, пользователь остается в модальном окне');
+        
+        // ЗАКРЫВАЕМ МОДАЛЬНОЕ ОКНО ПОСЛЕ УСПЕШНОГО ГОЛОСОВАНИЯ
+        setTimeout(() => {
+            document.getElementById('nomineeModal').style.display = 'none';
+            document.getElementById('nominationModal').style.display = 'none';
+            
+            // ПЕРЕЗАГРУЖАЕМ ДАННЫЕ ДЛЯ АДМИН-ПАНЕЛИ ЕСЛИ ОНА ОТКРЫТА
+            if (document.getElementById('adminPanel').style.display !== 'none') {
+                loadAdminResults();
+                loadAdminStats();
+            }
+        }, 2000);
     }
 }
 
-// НОВАЯ ФУНКЦИЯ: ОТМЕНА ГОЛОСА
-async function cancelVote() {
-    console.log('Отмена голоса...');
+// ========== НОВАЯ ФУНКЦИЯ ДЛЯ ОБНОВЛЕНИЯ СТАТУСА НОМИНАЦИИ ==========
+function updateNominationStatus(nominationId, nomineeName) {
+    console.log('Обновляем статус номинации:', nominationId, nomineeName);
     
-    const userName = localStorage.getItem('currentUser');
-    const mainNickname = getMainNickname(userName);
+    // Находим карточку номинации по ID и обновляем статус
+    const nominationCard = document.querySelector(`[data-nomination-id="${nominationId}"]`);
+    if (nominationCard) {
+        const statusElement = nominationCard.querySelector('.nomination-card-status');
+        if (statusElement) {
+            statusElement.textContent = `Вы уже голосовали: ${nomineeName}`;
+        }
+    }
+}
+
+// ========== ОБНОВЛЕННАЯ ФУНКЦИЯ ЗАГРУЗКИ НОМИНАЦИЙ ==========
+function loadNominations(category) {
+    console.log('Загружаем номинации для категории:', category);
     
-    try {
-        // Получаем текущие голоса
-        const votes = getUserVotes();
+    const nominations = NOMINATIONS[category];
+    const grid = document.getElementById('nominationsGrid');
+    grid.innerHTML = '';
+    
+    nominations.forEach(nomination => {
+        const card = document.createElement('div');
+        card.className = 'nomination-card';
+        card.setAttribute('data-nomination-id', nomination.id); // ДОБАВЛЯЕМ DATA-АТРИБУТ
         
-        // Находим индекс голоса для удаления
-        const voteIndex = votes.findIndex(vote => 
+        const userVotes = getUserVotes();
+        const currentUser = localStorage.getItem('currentUser');
+        const mainNickname = getMainNickname(currentUser);
+        const userVote = userVotes.find(vote => 
             getMainNickname(vote.user) === mainNickname && 
-            vote.nomination === currentNomination.id && 
-            vote.category === currentCategory
+            vote.nomination === nomination.id && 
+            vote.category === category
         );
         
-        if (voteIndex === -1) {
-            alert('Голос не найден');
-            return;
+        const statusText = userVote ? 
+            `Вы уже голосовали: ${userVote.nominee}` : 
+            'Нажмите для выбора';
+        
+        // Получаем URL изображения для номинации
+        const nominationImage = NOMINATION_IMAGES[nomination.id] || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
+        
+        card.innerHTML = `
+            <img class="nomination-card-image" src="${nominationImage}" alt="${nomination.name}">
+            <h3 class="nomination-card-title">${nomination.name}</h3>
+            <p class="nomination-card-description">${nomination.description}</p>
+            <div class="nomination-card-status">${statusText}</div>
+        `;
+        
+        card.addEventListener('click', function() {
+            console.log('Выбрана номинация:', nomination.name);
+            openNomineeModal(nomination);
+        });
+        
+        grid.appendChild(card);
+    });
+}
+
+// ========== ОБНОВЛЕННАЯ ФУНКЦИЯ СОХРАНЕНИЯ ГОЛОСА ==========
+async function saveVote(user, category, nominationId, nominee) {
+    try {
+        console.log('Сохранение голоса...', { user, category, nominationId, nominee });
+        
+        const votes = getUserVotes();
+        const mainNickname = getMainNickname(user);
+        
+        if (!mainNickname) {
+            alert('Ошибка: ваш никнейм не распознан в системе');
+            return false;
         }
         
-        // Удаляем голос из массива
-        votes.splice(voteIndex, 1);
+        // Ищем существующий голос пользователя в этой номинации
+        const existingVoteIndex = votes.findIndex(vote => 
+            getMainNickname(vote.user) === mainNickname && 
+            vote.category === category && 
+            vote.nomination === nominationId
+        );
         
-        // Сохраняем обновленный массив
+        const vote = {
+            user: user,
+            mainNickname: mainNickname,
+            category: category,
+            nomination: nominationId,
+            nominee: nominee,
+            timestamp: new Date().toISOString()
+        };
+        
+        if (existingVoteIndex !== -1) {
+            // ОБНОВЛЯЕМ существующий голос
+            votes[existingVoteIndex] = vote;
+            console.log('Обновлен существующий голос:', vote);
+        } else {
+            // ДОБАВЛЯЕМ новый голос
+            votes.push(vote);
+            console.log('Добавлен новый голос:', vote);
+        }
+        
         localStorage.setItem('flare_votes', JSON.stringify(votes));
-        console.log('Голос удален из localStorage');
+        console.log('Голос сохранен в localStorage:', vote);
         
         // Сохраняем в облако с ОБЪЕДИНЕНИЕМ данных
         const success = await cloudStorage.saveData(cloudStorage.getCurrentLocalData());
         if (success) {
-            console.log('Изменения синхронизированы с облаком');
+            console.log('Голос синхронизирован с облаком');
         } else {
-            console.log('Изменения сохранены локально (оффлайн режим)');
+            console.log('Голос сохранен локально (оффлайн режим)');
         }
         
-        // УДАЛЯЕМ ПРЕДЫДУЩЕЕ СООБЩЕНИЕ ЕСЛИ ОНО ЕСТЬ
-        const existingMessage = document.querySelector('.voting-success-message');
-        if (existingMessage) {
-            existingMessage.remove();
-        }
-        
-        // СОЗДАЕМ СООБЩЕНИЕ ОБ ОТМЕНЕ
-        const cancelMessage = document.createElement('div');
-        cancelMessage.className = 'voting-success-message';
-        cancelMessage.textContent = 'Ваш голос отменен! Теперь вы можете выбрать другого номинанта.';
-        cancelMessage.style.cssText = `
-            position: sticky;
-            top: 80px;
-            z-index: 9;
-            background: rgba(255, 152, 0, 0.95);
-            border: 1px solid #FF9800;
-            color: white;
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin: 0 -2rem 1rem -2rem;
-            text-align: center;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
-        `;
-        
-        // Вставляем сообщение ПОД шапкой модального окна
-        const modalHeader = document.querySelector('#nomineeModal .modal-header');
-        modalHeader.parentNode.insertBefore(cancelMessage, modalHeader.nextSibling);
-        
-        // Автоматически скрываем сообщение через 3 секунды
-        setTimeout(() => {
-            if (cancelMessage.parentNode) {
-                cancelMessage.remove();
-            }
-        }, 3000);
-        
-        // СБРАСЫВАЕМ СОСТОЯНИЕ
-        const confirmBtn = document.getElementById('confirmVoteBtn');
-        confirmBtn.textContent = 'Подтвердить голос';
-        confirmBtn.disabled = true;
-        confirmBtn.style.background = 'linear-gradient(90deg, var(--gold) 0%, var(--light-gold) 100%)';
-        
-        hasExistingVote = false;
-        existingVoteNominee = '';
-        
-        // Снимаем выделение с выбранного номинанта
-        document.querySelectorAll('.nominee-card').forEach(c => {
-            c.classList.remove('selected');
-        });
-        
-        // Скрываем поле "Другое" если оно было открыто
-        hideOtherInput();
-        
-        // Обновляем статус в карточке номинации
-        updateNominationStatus(currentNomination.name, null);
-        
-        console.log('Голос отменен');
-        
+        return true;
     } catch (error) {
-        console.error('Ошибка при отмене голоса:', error);
-        alert('Ошибка при отмене голоса. Попробуйте еще раз.');
+        console.error('Ошибка при сохранении голоса:', error);
+        alert('Ошибка при сохранении голоса. Попробуйте еще раз.');
+        return false;
     }
 }
 
-// ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ: ОБНОВЛЕНИЕ СТАТУСА В КАРТОЧКЕ НОМИНАЦИИ
-function updateNominationStatus(nominationName, nomineeName) {
-    const nominationCards = document.querySelectorAll('.nomination-card');
-    nominationCards.forEach(card => {
-        const title = card.querySelector('.nomination-card-title');
-        if (title && title.textContent === nominationName) {
-            const status = card.querySelector('.nomination-card-status');
-            if (status) {
-                if (nomineeName) {
-                    status.textContent = `Вы уже голосовали: ${nomineeName}`;
-                } else {
-                    status.textContent = 'Нажмите для выбора';
-                }
-            }
-        }
-    });
+// ========== ОБНОВЛЕННАЯ ФУНКЦИЯ ПОЛУЧЕНИЯ ГОЛОСОВ ==========
+function getUserVotes() {
+    try {
+        const votesJSON = localStorage.getItem('flare_votes');
+        const votes = votesJSON ? JSON.parse(votesJSON) : [];
+        
+        // ОТЛАДОЧНАЯ ИНФОРМАЦИЯ
+        console.log('Текущие голоса пользователя:', votes);
+        
+        return votes;
+    } catch (error) {
+        console.error('Ошибка при получении голосов:', error);
+        return [];
+    }
 }
 
         // ========== КАРУСЕЛЬ РЕЗУЛЬТАТОВ ПРОШЛОГО ГОДА ==========

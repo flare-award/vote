@@ -889,6 +889,44 @@
             border-bottom: 1px solid rgba(212, 175, 55, 0.3);
         }
 
+                .vote-modal-content .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 0.5rem;
+            margin: 0 -0.5rem;
+        }
+
+        .vote-modal-content .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .vote-modal-content .modal-body::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+
+        .vote-modal-content .modal-body::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 4px;
+        }
+
+        /* Сообщение об успехе */
+        .voting-success-message {
+            position: sticky;
+            top: 80px; /* Под шапкой */
+            z-index: 9;
+            background: rgba(76, 175, 80, 0.95);
+            border: 1px solid #4CAF50;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin: 0 -2rem 1rem -2rem;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+
         .modal-title {
             font-size: 1.8rem;
             font-weight: 600;
@@ -1427,6 +1465,18 @@
             margin: 2rem 0;
             font-weight: 600;
         }
+
+        /* Стиль для сообщения об успешном голосовании */
+        .voting-success-message {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4CAF50;
+            color: #4CAF50;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -1876,131 +1926,132 @@
         ];
 
         // ОБНОВЛЕННЫЕ НОМИНАЦИИ И НОМИНАНТЫ
-        const NOMINATIONS = {
-            main: [
-                { 
-                    id: 'flare_king', 
-                    name: 'FLARE KING', 
-                    description: 'Номинация для легенды сервера, настоящего короля и самого лучшего участника этого года.',
-                    nominees: ["Akirakume", "Dony_zq", "Eozik", "Flourin", "Maronnix", "Nodben", "Qusti"]
-                },
-                { 
-                    id: 'game_of_year', 
-                    name: 'ИГРА ГОДА', 
-                    description: 'Настоящий хит этого года, в которую хотелось играть снова и снова.',
-                    nominees: ["Counter-Strike 2", "Garry's Mod", "Marvel's Spider-Man 2", "Among Us", "Roblox"]
-                },
-                { 
-                    id: 'best_cs_player', 
-                    name: 'ЛУЧШИЙ CS-УЧАСТНИК', 
-                    description: 'Участник, который делает только хэдшот, MVP матча и просто сильнейший.',
-                    nominees: ["Akirakume", "Dony_zq", "Eozik", "Maronnix", "Menchik", "Nodben", "Qusti"]
-                },
-                { 
-                    id: 'best_fortnite_player', 
-                    name: 'ЛУЧШИЙ FORTNITE-УЧАСТНИК', 
-                    description: 'Участник, который перед тем как убить, строит небоскрёбы, занимает топ один, и никогда не промахивается с дробаша.',
-                    nominees: ["Akirakume", "Dony_zq", "Flourin", "Izumrudik", "Maronnix"]
-                },
-                { 
-                    id: 'multigaming_of_year', 
-                    name: 'MULTIGAMING ГОДА', 
-                    description: 'Жаждет сыграть во все новинки года, играет почти во всё, имея у себя огромную библиотеку игр в стим.',
-                    nominees: ["Akirakume", "Dony_zq", "Maronnix", "Nodben"]
-                },
-                { 
-                    id: 'meme_person_of_year', 
-                    name: 'ЧЕЛОВЕК-МЕМ ГОДА', 
-                    description: 'Тот, кто любой разговор превращает в коллекцию шуток, его фразы разбежались по всем чатикам, а любое его сообщение сразу становится мемом.',
-                    nominees: ["Akirakume", "Dony_zq", "Eozik", "Flourin", "Izumrudik", "Maronnix", "Nodben", "Qusti"]
-                },
-                { 
-                    id: 'conflict_of_year', 
-                    name: 'КОНФЛИКТ ГОДА', 
-                    description: 'Ничего не предвещало беды, как вдруг появилось оно, самое жаркое и матерное событие в этом году.',
-                    nominees: [
-                        "Akirakume, Eozik, Flourin, Maronnix, Nodben x Fines, Denis_185",
-                        "Akirakume x Flourin", 
-                        "Akirakume x Otmorozik",
-                        "Eozik x Izumrudik"
-                    ]
-                },
-                { 
-                    id: 'breakthrough_of_year', 
-                    name: 'ПРОРЫВ ГОДА', 
-                    description: 'Начинал год как типичный участник сервера, а теперь он общается со всеми и присутствует везде.',
-                    nominees: ["Cloury", "Izumrudik", "Hasan", "Menchik"]
-                }
-            ],
-            additional: [
-                { 
-                    id: 'track_of_year', 
-                    name: 'ТРЕК ГОДА', 
-                    description: 'Номинация для лучшего трека, который засел у многих в голове. Даже жалко что их так мало, а мог бы быть намного больше...',
-                    nominees: [
-                        {name: 'Maronn x Eozik - Лютый гандон', link: 'https://youtu.be/FWrgYyk0Crs?si=93Zeth0-WWiQSWMd'},
-                        {name: 'Maronn x Eozik - Полный провал (feat. Makos)', link: 'https://youtu.be/eyd1afetXvc?si=2l4ckYWmEunNYF4v'}
-                    ],
-                    hasLinks: true
-                },
-                { 
-                    id: 'toxic_of_year', 
-                    name: 'ТОКСИК ГОДА', 
-                    description: 'Номинация самого злого и агрессивного участника этого года.',
-                    nominees: ["Akirakume", "Eozik", "Nodben", "Qusti", "Другое"],
-                    hasOther: true
-                },
-                { 
-                    id: 'duo_of_year', 
-                    name: 'ДУО ГОДА', 
-                    description: 'Легендарное дуо, которое знают абсолютно все, а их совместная игра просто на высоте.',
-                    nominees: ["Akirakume x Menchik", "Dony_zq x Nodben", "Maronnix x Qusti", "Akirakume x Balabol", "Dony_zq x Maronnix", "Eozik x Maronnix"]
-                },
-                { 
-                    id: 'gamer_of_year', 
-                    name: 'ИГРОК ГОДА', 
-                    description: 'Участник, который во всех играх побеждал и был лучшим среди всех.',
-                    nominees: ["Akirakume", "Dony_zq", "Eozik", "Flourin", "Maronnix", "Menchik", "Nodben", "Qusti"]
-                },
-                { 
-                    id: 'cringe_of_year', 
-                    name: 'КРИНЖ ГОДА', 
-                    description: 'Тот, чьи слова и действия вызывают неловкость, смех сквозь стыд и желание перемотать жизнь на 15 секунд вперёд.',
-                    nominees: ["Cloury", "Flourin", "Izumrudik", "Nodben"]
-                },
-                { 
-                    id: 'freak_of_year', 
-                    name: 'ФРИК ГОДА', 
-                    description: 'Участник, который вытворял полную дичь в этом году.',
-                    nominees: ["Akirakume", "Cloury", "Nodben", "Другое"],
-                    hasOther: true
-                },
-                { 
-                    id: 'event_of_year', 
-                    name: 'СОБЫТИЕ ГОДА', 
-                    description: 'То, что хотели многие или многих это очень поразило.',
-                    nominees: ["Нодбен начал стримить", "У Макоса появился кот", "Игры на CYBERSHOKE", "Костя подстригся налысо", "NJSC - Nodben Joski Server Cup 2025"]
-                },
-                { 
-                    id: 'fail_of_year', 
-                    name: 'ПРОВАЛ ГОДА', 
-                    description: 'То, что получилось ужасно, ведь хотелось по-другому.',
-                    nominees: ["Несостоящаяся встреча Флоурина с Нодбеном", "Макос перестал стримить спустя месяц", "Интернет Нодбена"]
-                },
-                { 
-                    id: 'phrase_of_year', 
-                    name: 'ФРАЗА ГОДА', 
-                    description: 'Самая запоминающаяся фраза от одного из участников в этом году.',
-                    nominees: ['Eozik - Я НЕ ВЕРЮ', 'Maronnix - ты чо дурак?', 'Qusti - 123', 'Qusti - батя твой', 'Dony_zq - ало пицца']
-                },
-                { 
-                    id: 'sos_of_year', 
-                    name: 'С.О.С. ГОДА', 
-                    description: 'Самое ожидаемое событие года, то что ждали все.',
-                    nominees: ["Бета-тест Rematch", "Релиз Marvel's Spider-Man 2", "На сервере появились новые участники", "Выход серии THE FANTASTIC SPIDER-MAN 4 ЭПИЗОД"]
-                }
+const NOMINATIONS = {
+    main: [
+        { 
+            id: 'flare_king', 
+            name: 'FLARE KING', 
+            description: 'Номинация для легенды сервера, настоящего короля и самого лучшего участника этого года.',
+            nominees: ["Akirakume", "Dony_zq", "Eozik", "Flourin", "Maronnix", "Nodben", "Qusti"]
+        },
+        { 
+            id: 'game_of_year', 
+            name: 'ИГРА ГОДА', 
+            description: 'Настоящий хит этого года, в которую хотелось играть снова и снова.',
+            nominees: ["Counter-Strike 2", "Garry's Mod", "Marvel's Spider-Man 2", "Among Us", "Roblox", "Rematch"]
+        },
+        { 
+            id: 'best_cs_player', 
+            name: 'ЛУЧШИЙ CS-УЧАСТНИК', 
+            description: 'Участник, который делает только хэдшот, MVP матча и просто сильнейший.',
+            nominees: ["Akirakume", "Dony_zq", "Eozik", "Maronnix", "Menchik", "Nodben", "Qusti", "Izumrudik"]
+        },
+        { 
+            id: 'best_fortnite_player', 
+            name: 'ЛУЧШИЙ FORTNITE-УЧАСТНИК', 
+            description: 'Участник, который перед тем как убить, строит небоскрёбы, занимает топ один, и никогда не промахивается с дробаша.',
+            nominees: ["Akirakume", "Dony_zq", "Flourin", "Izumrudik", "Maronnix"]
+        },
+        { 
+            id: 'multigaming_of_year', 
+            name: 'MULTIGAMING ГОДА', 
+            description: 'Жаждет сыграть во все новинки года, играет почти во всё, имея у себя огромную библиотеку игр в стим.',
+            nominees: ["Akirakume", "Dony_zq", "Maronnix", "Nodben"]
+        },
+        { 
+            id: 'meme_person_of_year', 
+            name: 'ЧЕЛОВЕК-МЕМ ГОДА', 
+            description: 'Тот, кто любой разговор превращает в коллекцию шуток, его фразы разбежались по всем чатикам, а любое его сообщение сразу становится мемом.',
+            nominees: ["Akirakume", "Dony_zq", "Eozik", "Flourin", "Izumrudik", "Maronnix", "Nodben", "Qusti"]
+        },
+        { 
+            id: 'conflict_of_year', 
+            name: 'КОНФЛИКТ ГОДА', 
+            description: 'Ничего не предвещало беды, как вдруг появилось оно, самое жаркое и матерное событие в этом году.',
+            nominees: [
+                "Akirakume, Eozik, Flourin, Maronnix, Nodben x Fines, Denis_185",
+                "Akirakume x Flourin", 
+                "Akirakume x Otmorozik",
+                "Eozik x Izumrudik",
+                "Akirakume x Qusti"
             ]
-        };
+        },
+        { 
+            id: 'breakthrough_of_year', 
+            name: 'ПРОРЫВ ГОДА', 
+            description: 'Начинал год как типичный участник сервера, а теперь он общается со всеми и присутствует везде.',
+            nominees: ["Cloury", "Izumrudik", "Hasan", "Menchik"]
+        }
+    ],
+    additional: [
+        { 
+            id: 'track_of_year', 
+            name: 'ТРЕК ГОДА', 
+            description: 'Номинация для лучшего трека, который засел у многих в голове. Даже жалко что их так мало, а мог бы быть намного больше...',
+            nominees: [
+                {name: 'Maronn x Eozik - Лютый гандон', link: 'https://youtu.be/FWrgYyk0Crs?si=93Zeth0-WWiQSWMd'},
+                {name: 'Maronn x Eozik - Полный провал (feat. Makos)', link: 'https://youtu.be/eyd1afetXvc?si=2l4ckYWmEunNYF4v'}
+            ],
+            hasLinks: true
+        },
+        { 
+            id: 'toxic_of_year', 
+            name: 'ТОКСИК ГОДА', 
+            description: 'Номинация самого злого и агрессивного участника этого года.',
+            nominees: ["Akirakume", "Eozik", "Nodben", "Qusti", "Flourin", "Другое"],
+            hasOther: true
+        },
+        { 
+            id: 'duo_of_year', 
+            name: 'ДУО ГОДА', 
+            description: 'Легендарное дуо, которое знают абсолютно все, а их совместная игра просто на высоте.',
+            nominees: ["Akirakume x Menchik", "Dony_zq x Nodben", "Maronnix x Qusti", "Akirakume x Balabol", "Dony_zq x Maronnix", "Eozik x Maronnix"]
+        },
+        { 
+            id: 'gamer_of_year', 
+            name: 'ИГРОК ГОДА', 
+            description: 'Участник, который во всех играх побеждал и был лучшим среди всех.',
+            nominees: ["Akirakume", "Dony_zq", "Eozik", "Flourin", "Maronnix", "Menchik", "Nodben", "Qusti"]
+        },
+        { 
+            id: 'cringe_of_year', 
+            name: 'КРИНЖ ГОДА', 
+            description: 'Тот, чьи слова и действия вызывают неловкость, смех сквозь стыд и желание перемотать жизнь на 15 секунд вперёд.',
+            nominees: ["Cloury", "Flourin", "Izumrudik", "Nodben"]
+        },
+        { 
+            id: 'freak_of_year', 
+            name: 'ФРИК ГОДА', 
+            description: 'Участник, который вытворял полную дичь в этом году.',
+            nominees: ["Akirakume", "Cloury", "Nodben", "Другое"],
+            hasOther: true
+        },
+        { 
+            id: 'event_of_year', 
+            name: 'СОБЫТИЕ ГОДА', 
+            description: 'То, что хотели многие или многих это очень поразило.',
+            nominees: ["Нодбен начал стримить", "У Макоса появился кот", "Игры на CYBERSHOKE", "Костя подстригся налысо", "NJSC - Nodben Joski Server Cup 2025"]
+        },
+        { 
+            id: 'fail_of_year', 
+            name: 'ПРОВАЛ ГОДА', 
+            description: 'То, что получилось ужасно, ведь хотелось по-другому.',
+            nominees: ["Несостоящаяся встреча Флоурина с Нодбеном", "Макос перестал стримить спустя месяц", "Интернет Нодбена", "Сайт FLARE"]
+        },
+        { 
+            id: 'phrase_of_year', 
+            name: 'ФРАЗА ГОДА', 
+            description: 'Самая запоминающаяся фраза от одного из участников в этом году.',
+            nominees: ['Eozik - Я НЕ ВЕРЮ', 'Maronnix - ты чо дурак?', 'Qusti - 123', 'Qusti - батя твой', 'Dony_zq - ало пицца']
+        },
+        { 
+            id: 'sos_of_year', 
+            name: 'С.О.С. ГОДА', 
+            description: 'Самое ожидаемое событие года, то что ждали все.',
+            nominees: ["Бета-тест Rematch", "Релиз Marvel's Spider-Man 2", "На сервере появились новые участники", "Выход серии THE FANTASTIC SPIDER-MAN 4 ЭПИЗОД"]
+        }
+    ]
+};
 
         // ========== ФУНКЦИЯ ДЛЯ ПРЕДВАРИТЕЛЬНОЙ ЗАГРУЗКИ ИЗОБРАЖЕНИЙ ==========
         function preloadImages() {
@@ -2634,6 +2685,14 @@
                 console.log('Назад к номинациям');
                 document.getElementById('nomineeModal').style.display = 'none';
                 document.getElementById('nominationModal').style.display = 'flex';
+                
+                // Прокручиваем к началу при возврате к номинациям
+                setTimeout(() => {
+                    const nominationsGrid = document.getElementById('nominationsGrid');
+                    if (nominationsGrid) {
+                        nominationsGrid.scrollTop = 0;
+                    }
+                }, 10);
             });
 
             document.getElementById('confirmVoteBtn').addEventListener('click', async function() {
@@ -2841,247 +2900,468 @@
             }
         }
 
-        // ========== ФУНКЦИИ ГОЛОСОВАНИЯ ==========
-        let currentCategory = null;
-        let currentNomination = null;
-        let selectedOtherValue = '';
+// ========== ФУНКЦИИ ГОЛОСОВАНИЯ ==========
+let currentCategory = null;
+let currentNomination = null;
+let selectedOtherValue = '';
+let hasExistingVote = false;
+let existingVoteNominee = '';
 
-        function openVotingModal(category) {
-            console.log('Открываем модальное окно голосования для категории:', category);
+function openVotingModal(category) {
+    console.log('Открываем модальное окно голосования для категории:', category);
+    
+    const currentUser = localStorage.getItem('currentUser');
+    if (!currentUser) {
+        alert('Пожалуйста, войдите в систему для голосования');
+        document.getElementById('authModal').style.display = 'flex';
+        return;
+    }
+    
+    currentCategory = category;
+    
+    document.getElementById('nominationModalTitle').textContent = 
+        category === 'main' ? 'Основные номинации' : 'Дополнительные номинации';
+    
+    // ЗАПРЕЩАЕМ ПРОКРУТКУ САЙТА ПРИ ОТКРЫТОМ МОДАЛЬНОМ ОКНЕ
+    document.body.style.overflow = 'hidden';
+    
+    loadNominations(category);
+    document.getElementById('nominationModal').style.display = 'flex';
+    
+    // СБРАСЫВАЕМ ПРОКРУТКУ К НАЧАЛУ ПРИ ОТКРЫТИИ
+    setTimeout(() => {
+        const modalContent = document.querySelector('#nominationModal .modal-content');
+        if (modalContent) {
+            modalContent.scrollTop = 0;
+        }
+    }, 50);
+}
+
+function loadNominations(category) {
+    console.log('Загружаем номинации для категории:', category);
+    
+    const nominations = NOMINATIONS[category];
+    const grid = document.getElementById('nominationsGrid');
+    grid.innerHTML = '';
+    
+    nominations.forEach(nomination => {
+        const card = document.createElement('div');
+        card.className = 'nomination-card';
+        
+        const userVotes = getUserVotes();
+        const currentUser = localStorage.getItem('currentUser');
+        const mainNickname = getMainNickname(currentUser);
+        const userVote = userVotes.find(vote => 
+            getMainNickname(vote.user) === mainNickname && 
+            vote.nomination === nomination.id && 
+            vote.category === category
+        );
+        
+        const statusText = userVote ? 
+            `Вы уже голосовали: ${userVote.nominee}` : 
+            'Нажмите для выбора';
+        
+        // Получаем URL изображения для номинации
+        const nominationImage = NOMINATION_IMAGES[nomination.id] || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
+        
+        card.innerHTML = `
+            <img class="nomination-card-image" src="${nominationImage}" alt="${nomination.name}">
+            <h3 class="nomination-card-title">${nomination.name}</h3>
+            <p class="nomination-card-description">${nomination.description}</p>
+            <div class="nomination-card-status">${statusText}</div>
+        `;
+        
+        card.addEventListener('click', function() {
+            console.log('Выбрана номинация:', nomination.name);
+            openNomineeModal(nomination);
+        });
+        
+        grid.appendChild(card);
+    });
+}
+
+function openNomineeModal(nomination) {
+    console.log('Открываем модальное окно номинантов для:', nomination.name);
+    
+    currentNomination = nomination;
+    document.getElementById('nomineeModalTitle').textContent = nomination.name;
+    document.getElementById('nominationDescription').textContent = nomination.description;
+    
+    loadNominees();
+    document.getElementById('nominationModal').style.display = 'none';
+    document.getElementById('nomineeModal').style.display = 'flex';
+    
+    // СБРАСЫВАЕМ ПРОКРУТКУ К НАЧАЛУ ПРИ ОТКРЫТИИ
+    setTimeout(() => {
+        const modalContent = document.querySelector('#nomineeModal .modal-content');
+        if (modalContent) {
+            modalContent.scrollTop = 0;
+        }
+    }, 50);
+}
+
+function loadNominees() {
+    console.log('Загружаем список номинантов');
+    
+    const grid = document.getElementById('nomineesGrid');
+    grid.innerHTML = '';
+    document.getElementById('confirmVoteBtn').disabled = true;
+    selectedOtherValue = '';
+    
+    // Сбрасываем состояние
+    hasExistingVote = false;
+    existingVoteNominee = '';
+    
+    // Удаляем предыдущее поле ввода "Другое", если оно было
+    const existingOtherInput = document.querySelector('.other-input-container');
+    if (existingOtherInput) {
+        existingOtherInput.remove();
+    }
+    
+    const userVotes = getUserVotes();
+    const currentUser = localStorage.getItem('currentUser');
+    const mainNickname = getMainNickname(currentUser);
+    const currentVote = userVotes.find(vote => 
+        getMainNickname(vote.user) === mainNickname && 
+        vote.nomination === currentNomination.id && 
+        vote.category === currentCategory
+    );
+    
+    // ОБНОВЛЯЕМ КНОПКУ В ЗАВИСИМОСТИ ОТ ТОГО, ЕСТЬ ЛИ УЖЕ ГОЛОС
+    const confirmBtn = document.getElementById('confirmVoteBtn');
+    if (currentVote) {
+        hasExistingVote = true;
+        existingVoteNominee = currentVote.nominee;
+        confirmBtn.textContent = 'Отменить выбор';
+        confirmBtn.disabled = false;
+        confirmBtn.style.background = 'linear-gradient(90deg, #ff4444 0%, #cc0000 100%)';
+    } else {
+        confirmBtn.textContent = 'Подтвердить голос';
+        confirmBtn.disabled = true;
+        confirmBtn.style.background = 'linear-gradient(90deg, var(--gold) 0%, var(--light-gold) 100%)';
+    }
+    
+    // Обрабатываем номинантов в зависимости от типа
+    if (currentNomination.hasLinks) {
+        // Для треков с ссылками
+        currentNomination.nominees.forEach(nominee => {
+            const card = document.createElement('div');
+            card.className = 'nominee-card';
             
-            const currentUser = localStorage.getItem('currentUser');
-            if (!currentUser) {
-                alert('Пожалуйста, войдите в систему для голосования');
-                document.getElementById('authModal').style.display = 'flex';
-                return;
+            if (currentVote && currentVote.nominee === nominee.name) {
+                card.classList.add('selected');
             }
             
-            currentCategory = category;
-            
-            document.getElementById('nominationModalTitle').textContent = 
-                category === 'main' ? 'Основные номинации' : 'Дополнительные номинации';
-            
-            loadNominations(category);
-            document.getElementById('nominationModal').style.display = 'flex';
-        }
-
-        function loadNominations(category) {
-            console.log('Загружаем номинации для категории:', category);
-            
-            const nominations = NOMINATIONS[category];
-            const grid = document.getElementById('nominationsGrid');
-            grid.innerHTML = '';
-            
-            nominations.forEach(nomination => {
-                const card = document.createElement('div');
-                card.className = 'nomination-card';
-                
-                const userVotes = getUserVotes();
-                const currentUser = localStorage.getItem('currentUser');
-                const mainNickname = getMainNickname(currentUser);
-                const userVote = userVotes.find(vote => 
-                    getMainNickname(vote.user) === mainNickname && 
-                    vote.nomination === nomination.id && 
-                    vote.category === category
-                );
-                
-                const statusText = userVote ? 
-                    `Вы уже голосовали: ${userVote.nominee}` : 
-                    'Нажмите для выбора';
-                
-                // Получаем URL изображения для номинации
-                const nominationImage = NOMINATION_IMAGES[nomination.id] || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-                
-                card.innerHTML = `
-                    <img class="nomination-card-image" src="${nominationImage}" alt="${nomination.name}">
-                    <h3 class="nomination-card-title">${nomination.name}</h3>
-                    <p class="nomination-card-description">${nomination.description}</p>
-                    <div class="nomination-card-status">${statusText}</div>
-                `;
-                
-                card.addEventListener('click', function() {
-                    console.log('Выбрана номинация:', nomination.name);
-                    openNomineeModal(nomination);
-                });
-                
-                grid.appendChild(card);
-            });
-        }
-
-        function openNomineeModal(nomination) {
-            console.log('Открываем модальное окно номинантов для:', nomination.name);
-            
-            currentNomination = nomination;
-            document.getElementById('nomineeModalTitle').textContent = nomination.name;
-            document.getElementById('nominationDescription').textContent = nomination.description;
-            
-            loadNominees();
-            document.getElementById('nominationModal').style.display = 'none';
-            document.getElementById('nomineeModal').style.display = 'flex';
-        }
-
-        function loadNominees() {
-            console.log('Загружаем список номинантов');
-            
-            const grid = document.getElementById('nomineesGrid');
-            grid.innerHTML = '';
-            document.getElementById('confirmVoteBtn').disabled = true;
-            selectedOtherValue = '';
-            
-            // Удаляем предыдущее поле ввода "Другое", если оно было
-            const existingOtherInput = document.querySelector('.other-input-container');
-            if (existingOtherInput) {
-                existingOtherInput.remove();
-            }
-            
-            const userVotes = getUserVotes();
-            const currentUser = localStorage.getItem('currentUser');
-            const mainNickname = getMainNickname(currentUser);
-            const currentVote = userVotes.find(vote => 
-                getMainNickname(vote.user) === mainNickname && 
-                vote.nomination === currentNomination.id && 
-                vote.category === currentCategory
-            );
-            
-            // Обрабатываем номинантов в зависимости от типа
-            if (currentNomination.hasLinks) {
-                // Для треков с ссылками
-                currentNomination.nominees.forEach(nominee => {
-                    const card = document.createElement('div');
-                    card.className = 'nominee-card';
-                    
-                    if (currentVote && currentVote.nominee === nominee.name) {
-                        card.classList.add('selected');
-                        document.getElementById('confirmVoteBtn').disabled = false;
-                    }
-                    
-                    card.innerHTML = `
-                        <a href="${nominee.link}" target="_blank" class="track-link">${nominee.name}</a>
-                    `;
-                    
-                    card.addEventListener('click', function(e) {
-                        if (e.target.tagName === 'A') return; // Не выбираем при клике на ссылку
-                        
-                        console.log('Выбран номинант:', nominee.name);
-                        document.querySelectorAll('.nominee-card').forEach(c => {
-                            c.classList.remove('selected');
-                        });
-                        this.classList.add('selected');
-                        document.getElementById('confirmVoteBtn').disabled = false;
-                    });
-                    
-                    grid.appendChild(card);
-                });
-            } else {
-                // Обычные номинанты
-                currentNomination.nominees.forEach(nominee => {
-                    const card = document.createElement('div');
-                    card.className = 'nominee-card';
-                    
-                    if (currentVote && currentVote.nominee === nominee) {
-                        card.classList.add('selected');
-                        document.getElementById('confirmVoteBtn').disabled = false;
-                    }
-                    
-                    // Получаем URL изображения для номинанта
-                    const avatarUrl = AVATAR_IMAGES[nominee] || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=1280&h=720&q=80';
-                    
-                    card.innerHTML = `
-                        <img class="nominee-image" src="${avatarUrl}" alt="${nominee}">
-                        <div class="nominee-name">${nominee}</div>
-                    `;
-                    
-                    card.addEventListener('click', function() {
-                        console.log('Выбран номинант:', nominee);
-                        document.querySelectorAll('.nominee-card').forEach(c => {
-                            c.classList.remove('selected');
-                        });
-                        this.classList.add('selected');
-                        document.getElementById('confirmVoteBtn').disabled = false;
-                        
-                        // Если выбран "Другое", показываем поле ввода
-                        if (currentNomination.hasOther && nominee === 'Другое') {
-                            showOtherInput();
-                        } else {
-                            hideOtherInput();
-                        }
-                    });
-                    
-                    grid.appendChild(card);
-                });
-            }
-        }
-
-        function showOtherInput() {
-            // Удаляем предыдущее поле ввода, если оно было
-            const existingOtherInput = document.querySelector('.other-input-container');
-            if (existingOtherInput) {
-                existingOtherInput.remove();
-            }
-            
-            const otherInputContainer = document.createElement('div');
-            otherInputContainer.className = 'other-input-container';
-            otherInputContainer.innerHTML = `
-                <input type="text" class="other-input" id="otherInput" placeholder="Введите ник участника или событие...">
+            card.innerHTML = `
+                <a href="${nominee.link}" target="_blank" class="track-link">${nominee.name}</a>
             `;
             
-            document.getElementById('nomineesGrid').appendChild(otherInputContainer);
-            document.querySelector('.other-input-container').style.display = 'block';
-            
-            // Добавляем обработчик изменения поля ввода
-            document.getElementById('otherInput').addEventListener('input', function() {
-                selectedOtherValue = this.value.trim();
-                document.getElementById('confirmVoteBtn').disabled = !selectedOtherValue;
-            });
-        }
-
-        function hideOtherInput() {
-            const otherInputContainer = document.querySelector('.other-input-container');
-            if (otherInputContainer) {
-                otherInputContainer.style.display = 'none';
-                selectedOtherValue = '';
-            }
-        }
-
-        async function confirmVote() {
-            console.log('Подтверждаем голосование...');
-            
-            const selectedCard = document.querySelector('.nominee-card.selected');
-            if (!selectedCard) {
-                alert('Пожалуйста, выберите номинанта');
-                return;
-            }
-
-            let nomineeName;
-            
-            if (currentNomination.hasLinks) {
-                // Для треков берем текст ссылки
-                nomineeName = selectedCard.querySelector('.track-link').textContent;
-            } else if (currentNomination.hasOther && selectedCard.querySelector('.nominee-name').textContent === 'Другое') {
-                // Для "Другое" берем значение из поля ввода
-                if (!selectedOtherValue) {
-                    alert('Пожалуйста, введите значение для "Другое"');
-                    return;
+            card.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') return; // Не выбираем при клике на ссылку
+                
+                console.log('Выбран номинант:', nominee.name);
+                document.querySelectorAll('.nominee-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                
+                // ЕСЛИ ЕСТЬ СУЩЕСТВУЮЩИЙ ГОЛОС И ВЫБРАН ДРУГОЙ НОМИНАНТ
+                if (hasExistingVote && nominee.name !== existingVoteNominee) {
+                    confirmBtn.textContent = 'Подтвердить голос';
+                    confirmBtn.disabled = false;
+                    confirmBtn.style.background = 'linear-gradient(90deg, var(--gold) 0%, var(--light-gold) 100%)';
                 }
-                nomineeName = `Другое: ${selectedOtherValue}`;
-            } else {
-                // Обычный номинант
-                nomineeName = selectedCard.querySelector('.nominee-name').textContent;
-            }
-            
-            const userName = localStorage.getItem('currentUser');
-            
-            // НЕМЕДЛЕННО показываем сообщение и закрываем модальное окно
-            alert('Ваш голос за ' + nomineeName + ' в номинации "' + currentNomination.name + '" сохранен!');
-            document.getElementById('nomineeModal').style.display = 'none';
-            
-            // Сохраняем голос в фоне (не ждем завершения)
-            saveVote(userName, currentCategory, currentNomination.id, nomineeName).then(success => {
-                if (!success) {
-                    console.error('Не удалось сохранить голос');
+                // ЕСЛИ ВЫБРАН ТОТ ЖЕ НОМИНАНТ, ЧТО И БЫЛ
+                else if (hasExistingVote && nominee.name === existingVoteNominee) {
+                    confirmBtn.textContent = 'Отменить выбор';
+                    confirmBtn.disabled = false;
+                    confirmBtn.style.background = 'linear-gradient(90deg, #ff4444 0%, #cc0000 100%)';
+                }
+                // ЕСЛИ НОВЫЙ ВЫБОР БЕЗ ПРЕДЫДУЩЕГО ГОЛОСА
+                else {
+                    confirmBtn.textContent = 'Подтвердить голос';
+                    confirmBtn.disabled = false;
+                    confirmBtn.style.background = 'linear-gradient(90deg, var(--gold) 0%, var(--light-gold) 100%)';
+                }
+                
+                // Сбрасываем состояние существующего голоса при выборе нового
+                if (nominee.name !== existingVoteNomnee) {
+                    hasExistingVote = false;
                 }
             });
+            
+            grid.appendChild(card);
+        });
+    } else {
+        // Обычные номинанты
+        currentNomination.nominees.forEach(nominee => {
+            const card = document.createElement('div');
+            card.className = 'nominee-card';
+            
+            if (currentVote && currentVote.nominee === nominee) {
+                card.classList.add('selected');
+            }
+            
+            // Получаем URL изображения для номинанта
+            const avatarUrl = AVATAR_IMAGES[nominee] || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=1280&h=720&q=80';
+            
+            card.innerHTML = `
+                <img class="nominee-image" src="${avatarUrl}" alt="${nominee}">
+                <div class="nominee-name">${nominee}</div>
+            `;
+            
+            card.addEventListener('click', function() {
+                console.log('Выбран номинант:', nominee);
+                document.querySelectorAll('.nominee-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                
+                // ЕСЛИ ЕСТЬ СУЩЕСТВУЮЩИЙ ГОЛОС И ВЫБРАН ДРУГОЙ НОМИНАНТ
+                if (hasExistingVote && nominee !== existingVoteNominee) {
+                    confirmBtn.textContent = 'Подтвердить голос';
+                    confirmBtn.disabled = false;
+                    confirmBtn.style.background = 'linear-gradient(90deg, var(--gold) 0%, var(--light-gold) 100%)';
+                    hasExistingVote = false;
+                }
+                // ЕСЛИ ВЫБРАН ТОТ ЖЕ НОМИНАНТ, ЧТО И БЫЛ
+                else if (hasExistingVote && nominee === existingVoteNominee) {
+                    confirmBtn.textContent = 'Отменить выбор';
+                    confirmBtn.disabled = false;
+                    confirmBtn.style.background = 'linear-gradient(90deg, #ff4444 0%, #cc0000 100%)';
+                }
+                // ЕСЛИ НОВЫЙ ВЫБОР БЕЗ ПРЕДЫДУЩЕГО ГОЛОСА
+                else {
+                    confirmBtn.textContent = 'Подтвердить голос';
+                    confirmBtn.disabled = false;
+                    confirmBtn.style.background = 'linear-gradient(90deg, var(--gold) 0%, var(--light-gold) 100%)';
+                }
+                
+                // Если выбран "Другое", показываем поле ввода
+                if (currentNomination.hasOther && nominee === 'Другое') {
+                    showOtherInput();
+                } else {
+                    hideOtherInput();
+                }
+            });
+            
+            grid.appendChild(card);
+        });
+    }
+}
+
+async function confirmVote() {
+    console.log('Обработка голосования/отмены...');
+    
+    const confirmBtn = document.getElementById('confirmVoteBtn');
+    const selectedCard = document.querySelector('.nominee-card.selected');
+    
+    // ЕСЛИ НАЖАТА КНОПКА "ОТМЕНИТЬ ВЫБОР"
+    if (confirmBtn.textContent === 'Отменить выбор') {
+        console.log('Отмена существующего голоса...');
+        await cancelVote();
+        return;
+    }
+    
+    // ЕСЛИ НАЖАТА КНОПКА "ПОДТВЕРДИТЬ ГОЛОС"
+    if (!selectedCard) {
+        alert('Пожалуйста, выберите номинанта');
+        return;
+    }
+
+    let nomineeName;
+    
+    if (currentNomination.hasLinks) {
+        // Для треков берем текст ссылки
+        nomineeName = selectedCard.querySelector('.track-link').textContent;
+    } else if (currentNomination.hasOther && selectedCard.querySelector('.nominee-name').textContent === 'Другое') {
+        // Для "Другое" берем значение из поля ввода
+        if (!selectedOtherValue) {
+            alert('Пожалуйста, введите значение для "Другое"');
+            return;
         }
+        nomineeName = `Другое: ${selectedOtherValue}`;
+    } else {
+        // Обычный номинант
+        nomineeName = selectedCard.querySelector('.nominee-name').textContent;
+    }
+    
+    const userName = localStorage.getItem('currentUser');
+    
+    // Сохраняем голос
+    const success = await saveVote(userName, currentCategory, currentNomination.id, nomineeName);
+    
+    if (success) {
+        // УДАЛЯЕМ ПРЕДЫДУЩЕЕ СООБЩЕНИЕ ЕСЛИ ОНО ЕСТЬ
+        const existingMessage = document.querySelector('.voting-success-message');
+        if (existingMessage) {
+            existingMessage.remove();
+        }
+        
+        // СОЗДАЕМ НОВОЕ СООБЩЕНИЕ ОБ УСПЕХЕ В ВЕРХНЕЙ ЧАСТИ МОДАЛЬНОГО ОКНА
+        const successMessage = document.createElement('div');
+        successMessage.className = 'voting-success-message';
+        successMessage.textContent = `Ваш голос за "${nomineeName}" сохранен!`;
+        successMessage.style.cssText = `
+            position: sticky;
+            top: 80px;
+            z-index: 9;
+            background: rgba(76, 175, 80, 0.95);
+            border: 1px solid #4CAF50;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin: 0 -2rem 1rem -2rem;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        `;
+        
+        // Вставляем сообщение ПОД шапкой модального окна
+        const modalHeader = document.querySelector('#nomineeModal .modal-header');
+        modalHeader.parentNode.insertBefore(successMessage, modalHeader.nextSibling);
+        
+        // Автоматически скрываем сообщение через 3 секунды
+        setTimeout(() => {
+            if (successMessage.parentNode) {
+                successMessage.remove();
+            }
+        }, 3000);
+        
+        // ОБНОВЛЯЕМ КНОПКУ НА "ОТМЕНИТЬ ВЫБОР"
+        confirmBtn.textContent = 'Отменить выбор';
+        confirmBtn.style.background = 'linear-gradient(90deg, #ff4444 0%, #cc0000 100%)';
+        hasExistingVote = true;
+        existingVoteNominee = nomineeName;
+        
+        // Обновляем статус в карточке номинации
+        updateNominationStatus(currentNomination.name, nomineeName);
+        
+        console.log('Голос сохранен, пользователь остается в модальном окне');
+    }
+}
+
+// НОВАЯ ФУНКЦИЯ: ОТМЕНА ГОЛОСА
+async function cancelVote() {
+    console.log('Отмена голоса...');
+    
+    const userName = localStorage.getItem('currentUser');
+    const mainNickname = getMainNickname(userName);
+    
+    try {
+        // Получаем текущие голоса
+        const votes = getUserVotes();
+        
+        // Находим индекс голоса для удаления
+        const voteIndex = votes.findIndex(vote => 
+            getMainNickname(vote.user) === mainNickname && 
+            vote.nomination === currentNomination.id && 
+            vote.category === currentCategory
+        );
+        
+        if (voteIndex === -1) {
+            alert('Голос не найден');
+            return;
+        }
+        
+        // Удаляем голос из массива
+        votes.splice(voteIndex, 1);
+        
+        // Сохраняем обновленный массив
+        localStorage.setItem('flare_votes', JSON.stringify(votes));
+        console.log('Голос удален из localStorage');
+        
+        // Сохраняем в облако с ОБЪЕДИНЕНИЕМ данных
+        const success = await cloudStorage.saveData(cloudStorage.getCurrentLocalData());
+        if (success) {
+            console.log('Изменения синхронизированы с облаком');
+        } else {
+            console.log('Изменения сохранены локально (оффлайн режим)');
+        }
+        
+        // УДАЛЯЕМ ПРЕДЫДУЩЕЕ СООБЩЕНИЕ ЕСЛИ ОНО ЕСТЬ
+        const existingMessage = document.querySelector('.voting-success-message');
+        if (existingMessage) {
+            existingMessage.remove();
+        }
+        
+        // СОЗДАЕМ СООБЩЕНИЕ ОБ ОТМЕНЕ
+        const cancelMessage = document.createElement('div');
+        cancelMessage.className = 'voting-success-message';
+        cancelMessage.textContent = 'Ваш голос отменен! Теперь вы можете выбрать другого номинанта.';
+        cancelMessage.style.cssText = `
+            position: sticky;
+            top: 80px;
+            z-index: 9;
+            background: rgba(255, 152, 0, 0.95);
+            border: 1px solid #FF9800;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin: 0 -2rem 1rem -2rem;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        `;
+        
+        // Вставляем сообщение ПОД шапкой модального окна
+        const modalHeader = document.querySelector('#nomineeModal .modal-header');
+        modalHeader.parentNode.insertBefore(cancelMessage, modalHeader.nextSibling);
+        
+        // Автоматически скрываем сообщение через 3 секунды
+        setTimeout(() => {
+            if (cancelMessage.parentNode) {
+                cancelMessage.remove();
+            }
+        }, 3000);
+        
+        // СБРАСЫВАЕМ СОСТОЯНИЕ
+        const confirmBtn = document.getElementById('confirmVoteBtn');
+        confirmBtn.textContent = 'Подтвердить голос';
+        confirmBtn.disabled = true;
+        confirmBtn.style.background = 'linear-gradient(90deg, var(--gold) 0%, var(--light-gold) 100%)';
+        
+        hasExistingVote = false;
+        existingVoteNominee = '';
+        
+        // Снимаем выделение с выбранного номинанта
+        document.querySelectorAll('.nominee-card').forEach(c => {
+            c.classList.remove('selected');
+        });
+        
+        // Скрываем поле "Другое" если оно было открыто
+        hideOtherInput();
+        
+        // Обновляем статус в карточке номинации
+        updateNominationStatus(currentNomination.name, null);
+        
+        console.log('Голос отменен');
+        
+    } catch (error) {
+        console.error('Ошибка при отмене голоса:', error);
+        alert('Ошибка при отмене голоса. Попробуйте еще раз.');
+    }
+}
+
+// ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ: ОБНОВЛЕНИЕ СТАТУСА В КАРТОЧКЕ НОМИНАЦИИ
+function updateNominationStatus(nominationName, nomineeName) {
+    const nominationCards = document.querySelectorAll('.nomination-card');
+    nominationCards.forEach(card => {
+        const title = card.querySelector('.nomination-card-title');
+        if (title && title.textContent === nominationName) {
+            const status = card.querySelector('.nomination-card-status');
+            if (status) {
+                if (nomineeName) {
+                    status.textContent = `Вы уже голосовали: ${nomineeName}`;
+                } else {
+                    status.textContent = 'Нажмите для выбора';
+                }
+            }
+        }
+    });
+}
 
         // ========== КАРУСЕЛЬ РЕЗУЛЬТАТОВ ПРОШЛОГО ГОДА ==========
         let currentSlide = 0;
@@ -3295,7 +3575,7 @@
             alert('Данные успешно экспортированы в JSON файл!');
         }
 
-        console.log('FLARE 2025 с исправленной синхронизацией данных готов к работе!');
+        console.log('FLARE 2025 с улучшенной навигацией готов к работе!');
     </script>
 </body>
 </html>
